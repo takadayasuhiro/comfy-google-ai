@@ -9,9 +9,15 @@ from app.models.schemas import (
     EnhancePromptRequest,
     EnhancePromptResponse,
     GeneratedImageInfo,
+    GeneratedVideoInfo,
+    GenerateVideoRequest,
     UiGenerateRequest,
     UiGenerateResponse,
+    VideoJobStartResponse,
+    VideoJobStatusResponse,
 )
+from app.services.google_ai import create_video_thumbnail_file
+from app.services.video_jobs import get_job, start_video_job
 from app.services.comfy_runner import (
     ComfyWorkflowError,
     ComfyWorkflowTimeout,
@@ -150,9 +156,100 @@ async def workflow_template(
     )
 
 
+@router.post("/api/generate-video", response_model=VideoJobStartResponse)
+async def generate_video(request: GenerateVideoRequest) -> VideoJobStartResponse:
+    """Veo API で動画生成ジョブを開始する（完了まで数分かかる場合があります）。"""
+    if request.aspect_ratio not in ("16:9", "9:16"):
+        raise HTTPException(status_code=400, detail="アスペクト比は 16:9 または 9:16 のみ対応しています")
+
+    try:
+        job = await start_video_job(
+            prompt=request.prompt,
+            model=request.model,
+            duration_seconds=request.duration_seconds,
+            aspect_ratio=request.aspect_ratio,
+            auto_enhance=request.auto_enhance,
+            style=request.style,
+            enhanced_prompt=request.enhanced_prompt,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"動画生成の開始に失敗: {exc}") from exc
+
+    return VideoJobStartResponse(
+        job_id=job.job_id,
+        status=job.status,
+        message=job.message,
+        original_prompt=job.original_prompt,
+        enhanced_prompt=job.enhanced_prompt,
+    )
+
+
+@router.get("/api/generate-video/{job_id}", response_model=VideoJobStatusResponse)
+async def get_video_job(job_id: str) -> VideoJobStatusResponse:
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="ジョブが見つかりません")
+
+    video = None
+    if job.filename and job.url:
+        video = GeneratedVideoInfo(
+            filename=job.filename,
+            url=job.url,
+            thumb_filename=job.thumb_filename,
+            thumb_url=job.thumb_url,
+        )
+
+    return VideoJobStatusResponse(
+        job_id=job.job_id,
+        status=job.status,
+        message=job.message,
+        model=job.model,
+        prompt=job.prompt or None,
+        original_prompt=job.original_prompt,
+        enhanced_prompt=job.enhanced_prompt,
+        video=video,
+        error=job.error,
+    )
+
+
+@router.get("/api/video-thumbnail/{filename}")
+async def ensure_video_thumbnail(filename: str) -> dict:
+    """動画のサムネイル jpg を返す。未生成なら ffmpeg で作成を試みる。"""
+    safe_name = Path(filename).name
+    if not safe_name.lower().endswith(".mp4"):
+        raise HTTPException(status_code=400, detail="mp4 ファイルのみ対応しています")
+
+    video_path = settings.comfyui_output_dir / safe_name
+    if not video_path.is_file():
+        raise HTTPException(status_code=404, detail="動画が見つかりません")
+
+    thumb_path = video_path.with_name(f"{video_path.stem}_thumb.jpg")
+    if not thumb_path.is_file():
+        thumb_path = await create_video_thumbnail_file(video_path)
+    if thumb_path is None or not thumb_path.is_file():
+        raise HTTPException(
+            status_code=503,
+            detail="サムネイルを生成できません（ffmpeg のインストールを確認してください）",
+        )
+
+    return {
+        "filename": safe_name,
+        "thumb_filename": thumb_path.name,
+        "thumb_url": public_path(f"/comfy-output/{thumb_path.name}"),
+    }
+
+
 @router.get("/comfy-output/{filename}")
 async def serve_comfy_output(filename: str) -> FileResponse:
     path = settings.comfyui_output_dir / Path(filename).name
     if not path.is_file():
-        raise HTTPException(status_code=404, detail="画像が見つかりません")
-    return FileResponse(path)
+        raise HTTPException(status_code=404, detail="ファイルが見つかりません")
+    suffix = path.suffix.lower()
+    media_type = (
+        "video/mp4" if suffix == ".mp4"
+        else "image/jpeg" if suffix in {".jpg", ".jpeg"}
+        else None
+    )
+    return FileResponse(path, media_type=media_type)

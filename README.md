@@ -1,10 +1,11 @@
 # comfy-google-ai
 
-ComfyUI + Google AI API を仲介する画像生成 Web アプリです。
+ComfyUI + Google AI API を仲介する画像・動画生成 Web アプリです。
 
-- 日本語プロンプト → AI 英語拡張 → Imagen / Gemini で新規生成
-- Image to Image カスタマイズ（Gemini 編集 API）
-- ギャラリー、スタイル選択、ドラッグ＆ドロップ UI
+- **画像**: 日本語プロンプト → AI 英語拡張 → Imagen / Gemini で新規生成
+- **動画**: Veo API でテキストから mp4 生成（ComfyUI 経由なし・ジョブポーリング）
+- **カスタマイズ**: Image to Image（Gemini 編集 API）
+- **UI**: ギャラリー、スタイル選択、モーダルプレビュー、ドラッグ＆ドロップ
 
 ## クイックスタート（自宅・開発）
 
@@ -18,7 +19,35 @@ bash scripts/start_api_bg.sh
 bash scripts/start_comfyui.sh
 ```
 
+動画サムネイル生成（推奨）:
+
+```bash
+sudo apt install -y ffmpeg
+```
+
 ブラウザ: http://localhost:8000/ui
+
+## 主な機能（2026/06/07 時点）
+
+| 機能 | 説明 |
+|------|------|
+| 画像タブ | Imagen / Gemini、スタイル、アスペクト比、ComfyUI ワークフロー経由 |
+| 動画タブ | Veo 3.1 Lite / Fast / 3.1 / 2.0、尺 4〜8秒、16:9 / 9:16 |
+| スタイル | 水彩・サイバーパンク・アニメ等（画像・動画共通） |
+| ギャラリー | localStorage、並び替え、クリックでモーダル再生、サムネ自動補完 |
+| 会社向け | nginx サブパス `/gazou` 対応 |
+
+詳細: [docs/video-gallery-2026-06-07.md](docs/video-gallery-2026-06-07.md)
+
+## 環境変数（抜粋）
+
+| 変数 | デフォルト | 説明 |
+|------|------------|------|
+| `GOOGLE_API_KEY` | — | 必須。[AI Studio](https://aistudio.google.com/apikey) |
+| `GOOGLE_VIDEO_MODEL` | `veo-3.1-lite-generate-preview` | **Gemini API は `-preview` サフィックス** |
+| `APP_BASE_PATH` | 空 | 会社: `/gazou` |
+
+テンプレ: `.env.example`（自宅）、`.env.company.example`（会社）
 
 ## 会社サーバー向け
 
@@ -33,8 +62,17 @@ bash scripts/start_comfyui.sh
 | コンポーネント | 説明 |
 |----------------|------|
 | FastAPI (`app/`) | Web API + UI（venv） |
-| ComfyUI (`comfyui/`) | ワークフローエンジン（別途 clone） |
+| ComfyUI (`comfyui/`) | 画像ワークフローエンジン（動画は FastAPI 直結） |
 | nginx | 会社向け URL パス分離（OS パッケージ、venv 外） |
+| ffmpeg | 動画サムネイル生成（OS パッケージ、任意だが推奨） |
+
+### API エンドポイント（動画）
+
+| メソッド | パス | 説明 |
+|----------|------|------|
+| POST | `/api/generate-video` | Veo ジョブ開始 |
+| GET | `/api/generate-video/{job_id}` | ステータス取得 |
+| GET | `/api/video-thumbnail/{filename}` | サムネ jpg 生成・取得 |
 
 ## ライセンス
 

@@ -78,6 +78,7 @@
       position: relative;
       min-height: 0;
       height: 100%;
+      cursor: pointer;
     }
     .thumb.thumb-drag-over {
       outline: 2px solid var(--accent);
@@ -120,6 +121,8 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
+      height: 100%;
+      max-height: 100%;
       overflow: hidden;
     }
     header h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
@@ -193,13 +196,21 @@
     .status.error { color: var(--error); }
     .preview {
       flex: 1;
-      min-height: 200px;
-      display: grid;
-      place-items: center;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border: 1px dashed var(--border);
       border-radius: 12px;
       background: #12151e;
       overflow: hidden;
+      padding: 0.5rem;
+    }
+    .preview .placeholder {
+      width: 100%;
+      min-height: 200px;
+      display: grid;
+      place-items: center;
     }
     .preview img {
       max-width: 100%;
@@ -207,6 +218,11 @@
       object-fit: contain;
       border-radius: 8px;
       cursor: grab;
+    }
+    .preview.has-video {
+      align-items: stretch;
+      justify-content: stretch;
+      padding: 0.5rem;
     }
     .placeholder { color: var(--muted); text-align: center; padding: 2rem; font-size: 0.9rem; }
     .meta {
@@ -223,6 +239,190 @@
       display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.55rem;
       border-radius: 999px; background: #243049; color: var(--accent); margin-left: 0.5rem;
     }
+    .media-tabs {
+      display: flex; gap: 0.5rem; margin: 0.75rem 0 0;
+    }
+    .media-tabs .tab {
+      border: 1px solid var(--border); background: transparent; color: var(--muted);
+      border-radius: 8px; padding: 0.35rem 1.1rem; cursor: pointer; font-size: 0.9rem;
+    }
+    .media-tabs .tab.active {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+    .video-player {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .video-stage {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #000;
+      border-radius: 8px;
+      cursor: grab;
+      user-select: none;
+    }
+    .video-stage.dragging {
+      cursor: grabbing;
+      opacity: 0.55;
+    }
+    .video-drag-hint {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      font-size: 0.7rem;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .video-player .result-video {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #000;
+      display: block;
+      pointer-events: none;
+    }
+    .video-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.55rem;
+      background: #12151e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+    .vc-btn {
+      border: 1px solid var(--border);
+      background: #1e2640;
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.3rem 0.55rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      min-width: 2rem;
+    }
+    .vc-btn:hover { background: #2a3558; border-color: var(--accent); }
+    .vc-seek {
+      flex: 1;
+      min-width: 120px;
+      accent-color: var(--accent);
+    }
+    .vc-time {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+      min-width: 5.5rem;
+      text-align: right;
+    }
+    .thumb.is-video .thumb-body img { object-fit: cover; }
+    .thumb .play-badge {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      font-size: 10px;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .gallery-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      display: grid;
+      place-items: center;
+      padding: 1.25rem;
+    }
+    .gallery-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+    }
+    .gallery-modal-panel {
+      position: relative;
+      z-index: 1;
+      width: min(94vw, 980px);
+      max-height: 92vh;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+    }
+    .gallery-modal-title {
+      margin: 0;
+      padding-right: 2rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    .gallery-modal-close {
+      position: absolute;
+      top: 0.45rem;
+      right: 0.45rem;
+      width: 30px;
+      height: 30px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #1e2640;
+      color: var(--text);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .gallery-modal-close:hover { background: #2a3558; border-color: var(--accent); }
+    .gallery-modal-content {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #12151e;
+      border-radius: 10px;
+      padding: 0.5rem;
+    }
+    .gallery-modal-content > img {
+      max-width: 100%;
+      max-height: calc(92vh - 130px);
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .gallery-modal-content .video-player {
+      width: 100%;
+      max-height: calc(92vh - 130px);
+    }
+    .gallery-modal-content .video-drag-hint { display: none; }
+    .gallery-modal-content .video-stage { cursor: default; }
     .hidden { display: none !important; }
     @media (max-width: 1100px) {
       html, body { overflow: auto; height: auto; }
@@ -241,6 +441,7 @@
       .main-left { overflow: visible; }
       .result-card { min-height: 320px; }
       .preview img { max-height: 65vh; }
+      .preview.has-video { min-height: 280px; max-height: 60vh; }
     }
   </style>
 </head>
@@ -248,7 +449,7 @@
   <div class="layout">
     <aside class="sidebar">
       <h2>ギャラリー</h2>
-      <p>並び替え: 画像をドラッグ<br>ペイント: 左端⠿をドラッグ<br>または 📋→ペイントで Ctrl+V</p>
+      <p>クリック: 拡大表示<br>並び替え: サムネをドラッグ<br>ペイント: 左端⠿をドラッグ</p>
       <div class="gallery" id="gallery">
         <div class="gallery-empty" id="gallery-empty">右の生成結果から<br>ここへドラッグ</div>
       </div>
@@ -257,8 +458,12 @@
     <main class="main">
       <div class="main-left">
         <header>
-          <h1>Google AI 画像生成</h1>
-          <p>AIプロンプター → スタイル → ComfyUI → Google AI API</p>
+          <h1 id="page-title">Google AI 画像生成</h1>
+          <p id="page-subtitle">AIプロンプター → スタイル → ComfyUI → Google AI API</p>
+          <div class="media-tabs">
+            <button type="button" class="tab active" data-mode="image">画像</button>
+            <button type="button" class="tab" data-mode="video">動画</button>
+          </div>
         </header>
 
         <section class="card">
@@ -266,13 +471,15 @@
           <div class="pipeline-title">ComfyUI ワークフロー（ノード連携）</div>
         </div>
 
-        <label>参照画像（Image to Image）<span class="mode-badge" id="mode-badge">新規生成</span></label>
-        <div class="ref-zone" id="ref-zone">
-          <div class="ref-placeholder" id="ref-placeholder">
-            ギャラリー・生成結果からドラッグ<br>または画像をアップロード
+        <div id="image-ref-section">
+          <label>参照画像（Image to Image）<span class="mode-badge" id="mode-badge">新規生成</span></label>
+          <div class="ref-zone" id="ref-zone">
+            <div class="ref-placeholder" id="ref-placeholder">
+              ギャラリー・生成結果からドラッグ<br>または画像をアップロード
+            </div>
           </div>
+          <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
         </div>
-        <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp,image/gif" />
 
         <label for="prompt">プロンプト（日本語 OK）</label>
         <textarea id="prompt" placeholder="例: 夕焼けの柴犬"></textarea>
@@ -285,11 +492,14 @@
           カスタマイズ時は参照画像の人物・顔・性別を維持したまま、シーンだけ変更します
         </p>
 
-        <div class="row" id="generate-options">
+        <div class="row" id="style-row">
           <div>
             <label for="style">スタイル</label>
             <select id="style"></select>
           </div>
+        </div>
+
+        <div class="row" id="generate-options">
           <div>
             <label for="provider">API</label>
             <select id="provider">
@@ -309,6 +519,33 @@
           </div>
         </div>
 
+        <div class="row hidden" id="video-options">
+          <div>
+            <label for="video-model">Veo モデル</label>
+            <select id="video-model">
+              <option value="veo-3.1-lite-generate-preview" selected>Veo 3.1 Lite（高速）</option>
+              <option value="veo-3.1-fast-generate-preview">Veo 3.1 Fast</option>
+              <option value="veo-3.1-generate-preview">Veo 3.1（高品質+音声）</option>
+              <option value="veo-2.0-generate-001">Veo 2.0</option>
+            </select>
+          </div>
+          <div>
+            <label for="duration">尺（秒）</label>
+            <select id="duration">
+              <option value="4">4秒</option>
+              <option value="6" selected>6秒</option>
+              <option value="8">8秒</option>
+            </select>
+          </div>
+          <div>
+            <label for="video-aspect">アスペクト比</label>
+            <select id="video-aspect">
+              <option value="16:9" selected>16:9 ワイド</option>
+              <option value="9:16">9:16 縦</option>
+            </select>
+          </div>
+        </div>
+
         <button class="primary" id="generate">画像を生成する</button>
 
         <div class="enhanced-box" id="enhanced-box">
@@ -321,7 +558,8 @@
       </div>
 
       <section class="card result-card">
-        <label>生成結果 <span style="font-weight:normal;color:var(--muted)">（ギャラリーへドラッグ可）</span></label>
+        <label id="result-label">生成結果 <span id="result-hint" style="font-weight:normal;color:var(--muted)">（ギャラリーへドラッグ可）</span></label>
+        <p id="result-drag-hint" class="hidden" style="font-size:0.75rem;color:var(--muted);margin:0.25rem 0 0">生成結果をギャラリーへドラッグして保存できます</p>
         <div class="preview" id="preview">
           <div class="placeholder">ここに生成画像が表示されます</div>
         </div>
@@ -330,10 +568,24 @@
     </main>
   </div>
 
+  <div class="gallery-modal hidden" id="gallery-modal" role="dialog" aria-modal="true" aria-label="ギャラリープレビュー">
+    <div class="gallery-modal-backdrop" id="gallery-modal-backdrop"></div>
+    <div class="gallery-modal-panel">
+      <button type="button" class="gallery-modal-close" id="gallery-modal-close" title="閉じる">×</button>
+      <p class="gallery-modal-title" id="gallery-modal-title"></p>
+      <div class="gallery-modal-content" id="gallery-modal-content"></div>
+    </div>
+  </div>
+
   <script>
     const STORAGE_KEY = "comfy_google_ai_gallery";
     const GENERATE_NODES = ["AIプロンプター", "スタイル適用", "画像生成", "保存"];
     const EDIT_NODES = ["AIプロンプター", "画像カスタマイズ", "保存"];
+    const VIDEO_NODES = ["AIプロンプター", "スタイル適用", "Veo API", "保存"];
+    const VIDEO_POLL_MS = 5000;
+    const VIDEO_THUMB_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect fill="#1a2030" width="120" height="120"/><text x="60" y="68" fill="#5b8def" font-size="36" text-anchor="middle">▶</text></svg>'
+    )}`;
 
     const promptEl = document.getElementById("prompt");
     const styleEl = document.getElementById("style");
@@ -349,18 +601,28 @@
     const refZoneEl = document.getElementById("ref-zone");
     const refPlaceholderEl = document.getElementById("ref-placeholder");
     const modeBadgeEl = document.getElementById("mode-badge");
+    const styleRowEl = document.getElementById("style-row");
     const generateOptionsEl = document.getElementById("generate-options");
     const pipelineEl = document.getElementById("pipeline");
     const enhancedTextEl = document.getElementById("enhanced-text");
     const enhancedLabelEl = document.getElementById("enhanced-label");
     const fileInputEl = document.getElementById("file-input");
+    const videoModelEl = document.getElementById("video-model");
+    const durationEl = document.getElementById("duration");
+    const videoAspectEl = document.getElementById("video-aspect");
+    const videoOptionsEl = document.getElementById("video-options");
+    const imageRefSectionEl = document.getElementById("image-ref-section");
+    const resultHintEl = document.getElementById("result-hint");
 
+    let mediaMode = "image";
     let gallery = loadGallery();
     let referenceImage = null;
     let enhanceTimer = null;
     const fileCache = new Map();
+    const thumbCache = new Map();
     let reorderFromIndex = null;
     let thumbClickTimer = null;
+    let thumbDragActive = false;
     let cachedEnhanced = null;
     let lastEnhancedSource = null;
     let lastEnhancedMode = null;
@@ -368,11 +630,16 @@
     let enhanceInProgress = false;
     let stylePresets = {};
 
+    function getEnhanceMode() {
+      if (mediaMode === "video") return "video";
+      return referenceImage ? "edit" : "generate";
+    }
+
     function isEnhanceReady() {
       const prompt = promptEl.value.trim();
       if (!prompt) return false;
       if (!autoEnhanceEl.checked) return true;
-      const mode = referenceImage ? "edit" : "generate";
+      const mode = getEnhanceMode();
       return (
         !enhanceInProgress &&
         !!cachedEnhanced &&
@@ -398,7 +665,8 @@
         generateBtn.title = "AI拡張プレビュー作成中…";
         return;
       }
-      if (cachedEnhanced && lastEnhancedSource === prompt) {
+      const mode = getEnhanceMode();
+      if (cachedEnhanced && lastEnhancedSource === prompt && lastEnhancedMode === mode) {
         generateBtn.disabled = false;
         generateBtn.title = "";
       } else {
@@ -407,8 +675,160 @@
       }
     }
 
+    function isVideoItem(item) {
+      return item?.type === "video" || /\.mp4$/i.test(item?.filename || "");
+    }
+
+    function normalizeGalleryItem(item) {
+      const normalized = { ...item };
+      if (!normalized.type) {
+        normalized.type = isVideoItem(normalized) ? "video" : "image";
+      }
+      if (normalized.thumb_url && !normalized.thumbUrl) {
+        normalized.thumbUrl = normalized.thumb_url;
+      }
+      return normalized;
+    }
+
+    function guessServerThumbUrl(item) {
+      if (!item?.url || !/\.mp4$/i.test(item.filename || "")) return null;
+      return item.url.split("?")[0].replace(/\.mp4$/i, "_thumb.jpg");
+    }
+
+    async function probeImageUrl(url) {
+      if (!url) return false;
+      if (url.startsWith("data:image/")) return true;
+      try {
+        const res = await fetch(`${url.split("?")[0]}?probe=${Date.now()}`, { cache: "no-store" });
+        if (!res.ok) return false;
+        const contentType = res.headers.get("content-type") || "";
+        return contentType.startsWith("image/");
+      } catch {
+        return false;
+      }
+    }
+
+    function galleryDisplaySrc(item) {
+      if (isVideoItem(item)) {
+        return item.thumbUrl || item.thumb_url || guessServerThumbUrl(item) || VIDEO_THUMB_PLACEHOLDER;
+      }
+      return item.url;
+    }
+
+    function drawVideoFrameToDataUrl(videoEl, maxDim = 320) {
+      const w = videoEl.videoWidth;
+      const h = videoEl.videoHeight;
+      if (!w || !h) return null;
+      const scale = Math.min(1, maxDim / Math.max(w, h));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(w * scale));
+      canvas.height = Math.max(1, Math.round(h * scale));
+      canvas.getContext("2d").drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL("image/jpeg", 0.82);
+    }
+
+    function captureVideoThumbnailFromUrl(videoUrl) {
+      return new Promise((resolve) => {
+        const video = document.createElement("video");
+        video.crossOrigin = "anonymous";
+        video.preload = "auto";
+        video.muted = true;
+        video.playsInline = true;
+        const cleanup = () => {
+          video.pause();
+          video.removeAttribute("src");
+          video.load();
+        };
+        const fail = () => { cleanup(); resolve(null); };
+        video.addEventListener("error", fail, { once: true });
+        video.addEventListener("loadeddata", () => {
+          const seekTo = Math.min(1, Math.max(0.1, (video.duration || 1) * 0.12));
+          const onSeeked = () => {
+            video.removeEventListener("seeked", onSeeked);
+            try {
+              resolve(drawVideoFrameToDataUrl(video));
+            } catch {
+              fail();
+            } finally {
+              cleanup();
+            }
+          };
+          video.addEventListener("seeked", onSeeked);
+          try { video.currentTime = seekTo; }
+          catch { fail(); }
+        }, { once: true });
+        video.src = videoUrl;
+      });
+    }
+
+    async function resolveVideoThumb(item) {
+      const normalized = normalizeGalleryItem(item);
+      const candidates = [
+        normalized.thumbUrl,
+        normalized.thumb_url,
+        guessServerThumbUrl(normalized),
+      ].filter(Boolean);
+
+      for (const url of candidates) {
+        if (await probeImageUrl(url)) {
+          normalized.thumbUrl = url.split("?")[0];
+          return normalized.thumbUrl;
+        }
+      }
+
+      try {
+        const res = await fetch(`/api/video-thumbnail/${encodeURIComponent(normalized.filename)}`);
+        const data = await res.json();
+        if (res.ok && data.thumb_url) {
+          normalized.thumbUrl = data.thumb_url;
+          return data.thumb_url;
+        }
+      } catch {
+        /* fallback below */
+      }
+
+      const dataUrl = await captureVideoThumbnailFromUrl(`${normalized.url}?t=${Date.now()}`);
+      if (dataUrl) {
+        normalized.thumbUrl = dataUrl;
+        return dataUrl;
+      }
+      return null;
+    }
+
+    function updateGalleryThumbImage(filename, url) {
+      const thumb = galleryEl.querySelector(`.thumb[data-filename="${CSS.escape(filename)}"] img`);
+      if (thumb && url) {
+        thumb.src = `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}`;
+      }
+    }
+
+    async function refreshMissingVideoThumbs() {
+      const targets = gallery.filter((item) => isVideoItem(item));
+      await Promise.all(targets.map(async (item) => {
+        const current = galleryDisplaySrc(item);
+        if (current !== VIDEO_THUMB_PLACEHOLDER && await probeImageUrl(current)) return;
+        const url = await resolveVideoThumb(item);
+        if (!url) return;
+        const idx = gallery.findIndex((g) => g.filename === item.filename);
+        if (idx < 0) return;
+        gallery[idx].thumbUrl = url;
+        updateGalleryThumbImage(item.filename, url);
+      }));
+      saveGallery();
+    }
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+      const m = Math.floor(seconds / 60);
+      const s = Math.floor(seconds % 60);
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
     function loadGallery() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(raw) ? raw.map(normalizeGalleryItem) : [];
+      }
       catch { return []; }
     }
     function saveGallery() { localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery)); }
@@ -447,13 +867,16 @@
     }
 
     function updateStyledPreview() {
+      const prompt = promptEl.value.trim();
       if (!autoEnhanceEl.checked) {
-        enhancedTextEl.textContent = "（自動拡張 OFF）";
+        enhancedTextEl.textContent = prompt
+          ? applyStyleLocal(prompt, styleEl.value)
+          : "（自動拡張 OFF）";
         updateGenerateButtonState();
         return;
       }
       if (!cachedEnhanced) {
-        enhancedTextEl.textContent = promptEl.value.trim()
+        enhancedTextEl.textContent = prompt
           ? "（プロンプトを入力すると表示）"
           : "（プロンプトを入力すると表示）";
         return;
@@ -482,10 +905,12 @@
 
     async function previewEnhance({ force = false } = {}) {
       const prompt = promptEl.value.trim();
-      const mode = referenceImage ? "edit" : "generate";
+      const mode = getEnhanceMode();
       enhancedLabelEl.textContent = mode === "edit"
         ? "編集指示プレビュー（参照画像の人物を維持）:"
-        : "AI拡張プレビュー:";
+        : mode === "video"
+          ? "動画プロンプトプレビュー:"
+          : "AI拡張プレビュー:";
       if (!prompt || !autoEnhanceEl.checked) {
         clearEnhanceCache();
         enhancedTextEl.textContent = autoEnhanceEl.checked
@@ -538,7 +963,7 @@
     function scheduleEnhancePreview() {
       clearTimeout(enhanceTimer);
       const prompt = promptEl.value.trim();
-      const mode = referenceImage ? "edit" : "generate";
+      const mode = getEnhanceMode();
       if (cachedEnhanced && lastEnhancedSource === prompt && lastEnhancedMode === mode) {
         updateStyledPreview();
         updateGenerateButtonState();
@@ -549,7 +974,12 @@
     }
 
     function makeDragPayload(item) {
-      return JSON.stringify({ filename: item.filename, url: item.url });
+      return JSON.stringify({
+        filename: item.filename,
+        url: item.url,
+        type: item.type || (isVideoItem(item) ? "video" : "image"),
+        thumbUrl: item.thumbUrl || item.thumb_url || null,
+      });
     }
     function parseDragPayload(e) {
       const raw = e.dataTransfer.getData("application/x-gallery-image");
@@ -559,7 +989,9 @@
 
     function mimeFromFilename(filename, blobType) {
       if (blobType && blobType.startsWith("image/")) return blobType;
+      if (blobType && blobType.startsWith("video/")) return blobType;
       const ext = (filename.split(".").pop() || "png").toLowerCase();
+      if (ext === "mp4") return "video/mp4";
       if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
       if (ext === "webp") return "image/webp";
       if (ext === "gif") return "image/gif";
@@ -581,8 +1013,223 @@
       }
     }
 
+    async function ensureThumbCached(item) {
+      if (!isVideoItem(item)) return ensureFileCached(item);
+      if (thumbCache.has(item.filename)) return thumbCache.get(item.filename);
+      const thumbUrl = item.thumbUrl || item.thumb_url;
+      if (!thumbUrl) return null;
+      try {
+        const res = await fetch(thumbUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const thumbName = `${item.filename.replace(/\.mp4$/i, "")}_thumb.jpg`;
+        const file = new File([blob], thumbName, {
+          type: blob.type || "image/jpeg",
+          lastModified: Date.now(),
+        });
+        thumbCache.set(item.filename, file);
+        return file;
+      } catch {
+        return null;
+      }
+    }
+
     async function prefetchGalleryFiles() {
-      await Promise.all(gallery.map((item) => ensureFileCached(item)));
+      await Promise.all(gallery.map((item) => (
+        isVideoItem(item) ? ensureThumbCached(item) : ensureFileCached(item)
+      )));
+    }
+
+    function captureVideoThumbnailFromElement(videoEl) {
+      return new Promise((resolve) => {
+        const done = (dataUrl) => resolve(dataUrl || null);
+        const draw = () => {
+          try {
+            done(drawVideoFrameToDataUrl(videoEl));
+          } catch {
+            done(null);
+          }
+        };
+        if (videoEl.readyState >= 2) {
+          draw();
+          return;
+        }
+        const onMeta = () => {
+          const seekTo = Math.min(0.5, (videoEl.duration || 1) * 0.1);
+          const onSeeked = () => {
+            videoEl.removeEventListener("seeked", onSeeked);
+            draw();
+          };
+          videoEl.addEventListener("seeked", onSeeked);
+          try { videoEl.currentTime = seekTo; }
+          catch { draw(); }
+        };
+        videoEl.addEventListener("loadeddata", onMeta, { once: true });
+        videoEl.addEventListener("error", () => done(null), { once: true });
+      });
+    }
+
+    async function ensureVideoThumb(item, videoEl = null) {
+      if (item.thumbUrl || item.thumb_url) {
+        if (await probeImageUrl(item.thumbUrl || item.thumb_url)) return item;
+      }
+      if (videoEl) {
+        const dataUrl = await captureVideoThumbnailFromElement(videoEl);
+        if (dataUrl) {
+          item.thumbUrl = dataUrl;
+          return item;
+        }
+      }
+      const url = await resolveVideoThumb(item);
+      if (url) item.thumbUrl = url;
+      return item;
+    }
+
+    function initVideoPlayer(container) {
+      const video = container.querySelector(".result-video");
+      const seek = container.querySelector(".vc-seek");
+      const timeEl = container.querySelector(".vc-time");
+      if (!video || !seek || !timeEl) return video;
+
+      const updateTime = () => {
+        const cur = video.currentTime || 0;
+        const dur = video.duration || 0;
+        timeEl.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+        if (dur > 0) seek.value = String(Math.round((cur / dur) * 1000));
+      };
+
+      video.addEventListener("timeupdate", updateTime);
+      video.addEventListener("loadedmetadata", updateTime);
+      video.addEventListener("ended", updateTime);
+
+      seek.addEventListener("input", () => {
+        const dur = video.duration || 0;
+        if (dur > 0) video.currentTime = (Number(seek.value) / 1000) * dur;
+      });
+
+      container.querySelectorAll(".vc-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const action = btn.dataset.action;
+          if (action === "play") video.play();
+          if (action === "pause") video.pause();
+          if (action === "stop") { video.pause(); video.currentTime = 0; }
+          if (action === "rewind") video.currentTime = Math.max(0, video.currentTime - 10);
+          if (action === "forward") {
+            const dur = video.duration || 0;
+            video.currentTime = Math.min(dur, video.currentTime + 10);
+          }
+          updateTime();
+        });
+      });
+      return video;
+    }
+
+    function setPreviewVideoMode(enabled) {
+      previewEl.classList.toggle("has-video", enabled);
+    }
+
+    function buildVideoPlayerHtml(videoUrl) {
+      return `
+        <div class="video-player" id="video-player">
+          <div class="video-stage" title="ギャラリーへドラッグ">
+            <span class="video-drag-hint">⠿ ギャラリーへドラッグ</span>
+            <video class="result-video" playsinline preload="metadata" src="${videoUrl}"></video>
+          </div>
+          <div class="video-controls">
+            <button type="button" class="vc-btn" data-action="rewind" title="10秒戻る">⏪</button>
+            <button type="button" class="vc-btn" data-action="play" title="再生">▶</button>
+            <button type="button" class="vc-btn" data-action="pause" title="一時停止">⏸</button>
+            <button type="button" class="vc-btn" data-action="stop" title="先頭へ">⏹</button>
+            <button type="button" class="vc-btn" data-action="forward" title="10秒進む">⏩</button>
+            <input type="range" class="vc-seek" min="0" max="1000" value="0" />
+            <span class="vc-time">0:00 / 0:00</span>
+          </div>
+        </div>`;
+    }
+
+    function showVideoInPreview(item) {
+      const videoUrl = `${item.url}?t=${Date.now()}`;
+      setPreviewVideoMode(true);
+      previewEl.innerHTML = buildVideoPlayerHtml(videoUrl);
+      const player = document.getElementById("video-player");
+      const videoEl = initVideoPlayer(player);
+      setupVideoResultDrag(player, item);
+      if (!item.thumbUrl && !item.thumb_url && videoEl) {
+        videoEl.addEventListener("loadeddata", async () => {
+          await ensureVideoThumb(item, videoEl);
+          const idx = gallery.findIndex((g) => g.filename === item.filename);
+          if (idx >= 0) {
+            gallery[idx] = { ...gallery[idx], ...item };
+            saveGallery();
+            renderGallery();
+          }
+        }, { once: true });
+      }
+      statusEl.textContent = "ギャラリーから再生中";
+      statusEl.className = "status";
+      metaEl.textContent = `ファイル: ${item.filename}`;
+    }
+
+    async function addVideoToGallery(item, videoEl = null) {
+      const normalized = normalizeGalleryItem(item);
+      await ensureVideoThumb(normalized, videoEl);
+      addToGallery(normalized);
+    }
+
+    function closeGalleryModal() {
+      const modal = document.getElementById("gallery-modal");
+      const content = document.getElementById("gallery-modal-content");
+      const video = content.querySelector("video");
+      if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
+      }
+      content.innerHTML = "";
+      modal.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function openGalleryModal(item) {
+      const normalized = normalizeGalleryItem(item);
+      const modal = document.getElementById("gallery-modal");
+      const content = document.getElementById("gallery-modal-content");
+      const title = document.getElementById("gallery-modal-title");
+      const cacheBust = Date.now();
+      title.textContent = normalized.filename;
+
+      if (isVideoItem(normalized)) {
+        content.innerHTML = buildVideoPlayerHtml(`${normalized.url}?t=${cacheBust}`);
+        const player = content.querySelector(".video-player");
+        if (player) {
+          const video = player.querySelector(".result-video");
+          if (video) video.style.pointerEvents = "auto";
+          initVideoPlayer(player);
+        }
+      } else {
+        content.innerHTML = `<img src="${normalized.url}?t=${cacheBust}" alt="" />`;
+      }
+
+      modal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function setupVideoResultDrag(container, item) {
+      const stage = container.querySelector(".video-stage");
+      const video = container.querySelector(".result-video");
+      if (!stage) return;
+      const normalized = normalizeGalleryItem(item);
+      if (video) {
+        video.draggable = false;
+        video.addEventListener("dragstart", (e) => e.preventDefault());
+      }
+      stage.draggable = true;
+      stage.addEventListener("dragstart", (e) => {
+        if (e.target.closest(".video-controls")) return;
+        attachInternalDrag(e, normalized);
+        stage.classList.add("dragging");
+      });
+      stage.addEventListener("dragend", () => stage.classList.remove("dragging"));
     }
 
     async function downloadImage(item) {
@@ -607,9 +1254,13 @@
     }
 
     async function copyImageToClipboard(item) {
-      const file = await ensureFileCached(item);
+      const file = isVideoItem(item)
+        ? await ensureThumbCached(item)
+        : await ensureFileCached(item);
       if (!file) {
-        statusEl.textContent = "コピーに失敗しました";
+        statusEl.textContent = isVideoItem(item)
+          ? "サムネのコピーに失敗しました"
+          : "コピーに失敗しました";
         statusEl.className = "status error";
         return;
       }
@@ -644,7 +1295,8 @@
     }
 
     function attachInternalDrag(e, item, galleryIndex = null) {
-      e.dataTransfer.setData("application/x-gallery-image", makeDragPayload(item));
+      const latest = gallery.find((g) => g.filename === item.filename) || item;
+      e.dataTransfer.setData("application/x-gallery-image", makeDragPayload(latest));
       if (galleryIndex !== null) {
         reorderFromIndex = galleryIndex;
         e.dataTransfer.setData("application/x-gallery-reorder", String(galleryIndex));
@@ -653,12 +1305,17 @@
     }
 
     function attachExternalFileDrag(e, item) {
-      const file = fileCache.get(item.filename);
+      const file = isVideoItem(item)
+        ? thumbCache.get(item.filename)
+        : fileCache.get(item.filename);
       if (!file) {
         e.preventDefault();
-        statusEl.textContent = "画像の準備中です。1〜2秒待ってから再度ドラッグしてください";
+        statusEl.textContent = isVideoItem(item)
+          ? "サムネの準備中です。1〜2秒待ってから再度ドラッグしてください"
+          : "画像の準備中です。1〜2秒待ってから再度ドラッグしてください";
         statusEl.className = "status";
-        ensureFileCached(item);
+        if (isVideoItem(item)) ensureThumbCached(item);
+        else ensureFileCached(item);
         return false;
       }
       if (e.dataTransfer.items?.clear) {
@@ -691,11 +1348,13 @@
       el.draggable = true;
       el.addEventListener("dragstart", (e) => {
         if (e.target.closest(".export-grip")) return;
+        thumbDragActive = true;
         attachInternalDrag(e, item, galleryIndex);
         el.classList.add("dragging");
       });
       el.addEventListener("dragend", () => {
         reorderFromIndex = null;
+        setTimeout(() => { thumbDragActive = false; }, 0);
         el.classList.remove("dragging");
         galleryEl.querySelectorAll(".thumb-drag-over").forEach((n) =>
           n.classList.remove("thumb-drag-over")
@@ -773,7 +1432,7 @@
         e.preventDefault();
         zone.classList.remove("drag-over");
         const item = parseDragPayload(e);
-        if (item) onDrop(item);
+        if (item) onDrop(normalizeGalleryItem(item));
       });
     }
 
@@ -781,57 +1440,97 @@
       galleryEl.querySelectorAll(".thumb").forEach((n) => n.remove());
       galleryEmptyEl.classList.toggle("hidden", gallery.length > 0);
       gallery.forEach((item, index) => {
+        const normalized = normalizeGalleryItem(item);
+        gallery[index] = normalized;
+        const isVideo = isVideoItem(normalized);
         const div = document.createElement("div");
-        div.className = "thumb";
-        div.title = item.filename;
+        div.className = `thumb${isVideo ? " is-video" : ""}`;
+        div.dataset.filename = normalized.filename;
+        div.title = normalized.filename;
+        const displaySrc = galleryDisplaySrc(normalized);
         div.innerHTML = [
-          `<div class="export-grip" title="ペイント等へドラッグ（ファイルのみ）">⠿</div>`,
+          `<div class="export-grip" title="ペイント等へドラッグ（サムネ画像）">⠿</div>`,
           `<div class="thumb-body">`,
-          `<img src="${item.url}" alt="" />`,
-          `<button class="copy-btn" type="button" title="コピー（ペイントで Ctrl+V）">📋</button>`,
-          `<button class="download-btn" type="button" title="保存">↓</button>`,
+          `<img src="${displaySrc}" alt="" />`,
+          isVideo ? `<span class="play-badge">▶</span>` : "",
+          `<button class="copy-btn" type="button" title="${isVideo ? "サムネをコピー" : "コピー（ペイントで Ctrl+V）"}">📋</button>`,
+          `<button class="download-btn" type="button" title="${isVideo ? "mp4を保存" : "保存"}">↓</button>`,
           `<button class="remove" type="button" title="ギャラリーから削除">×</button>`,
           `</div>`,
         ].join("");
-        setupGalleryThumb(div, item, index);
+        setupGalleryThumb(div, normalized, index);
         div.querySelector(".copy-btn").addEventListener("click", (e) => {
           e.stopPropagation();
-          copyImageToClipboard(item);
+          copyImageToClipboard(normalized);
         });
         div.querySelector(".remove").addEventListener("click", (e) => {
           e.stopPropagation();
           gallery.splice(index, 1);
-          fileCache.delete(item.filename);
+          fileCache.delete(normalized.filename);
+          thumbCache.delete(normalized.filename);
           saveGallery();
           renderGallery();
         });
         div.querySelector(".download-btn").addEventListener("click", (e) => {
           e.stopPropagation();
-          downloadImage(item);
+          downloadImage(normalized);
         });
         div.querySelector(".thumb-body").addEventListener("click", (e) => {
           if (e.target.closest(".remove, .download-btn, .copy-btn")) return;
-          clearTimeout(thumbClickTimer);
-          thumbClickTimer = setTimeout(() => downloadImage(item), 280);
+          if (thumbDragActive) return;
+          openGalleryModal(normalized);
         });
         div.querySelector(".thumb-body").addEventListener("dblclick", (e) => {
           if (e.target.closest(".remove, .download-btn, .copy-btn")) return;
-          clearTimeout(thumbClickTimer);
-          setReference(item);
+          if (isVideo) return;
+          closeGalleryModal();
+          setReference(normalized);
         });
+        if (isVideo) {
+          const img = div.querySelector(".thumb-body img");
+          img.addEventListener("error", () => {
+            resolveVideoThumb(normalized).then((url) => {
+              if (!url) {
+                img.src = VIDEO_THUMB_PLACEHOLDER;
+                return;
+              }
+              const idx = gallery.findIndex((g) => g.filename === normalized.filename);
+              if (idx >= 0) {
+                gallery[idx].thumbUrl = url;
+                saveGallery();
+              }
+              updateGalleryThumbImage(normalized.filename, url);
+            });
+          }, { once: true });
+        }
         galleryEl.appendChild(div);
       });
+      saveGallery();
       prefetchGalleryFiles();
+      refreshMissingVideoThumbs();
     }
 
     function addToGallery(item) {
-      if (gallery.some((g) => g.filename === item.filename)) return;
-      gallery.unshift(item);
+      const normalized = normalizeGalleryItem(item);
+      if (gallery.some((g) => g.filename === normalized.filename)) return;
+      gallery.unshift(normalized);
       if (gallery.length > 60) gallery = gallery.slice(0, 60);
-      saveGallery(); renderGallery();
+      saveGallery();
+      renderGallery();
+      if (isVideoItem(normalized)) {
+        resolveVideoThumb(normalized).then((url) => {
+          if (!url) return;
+          const idx = gallery.findIndex((g) => g.filename === normalized.filename);
+          if (idx < 0) return;
+          gallery[idx].thumbUrl = url;
+          saveGallery();
+          updateGalleryThumbImage(normalized.filename, url);
+        });
+      }
     }
 
     function setReference(item) {
+      if (isVideoItem(item)) return;
       referenceImage = item;
       refZoneEl.classList.add("has-image");
       refZoneEl.innerHTML = `
@@ -866,10 +1565,50 @@
       updateMode();
     }
 
+    function setMediaMode(mode) {
+      mediaMode = mode;
+      document.querySelectorAll(".media-tabs .tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.mode === mode);
+      });
+      const isVideo = mode === "video";
+      document.getElementById("page-title").textContent = isVideo
+        ? "Google AI 動画生成"
+        : "Google AI 画像生成";
+      document.getElementById("page-subtitle").textContent = isVideo
+        ? "AIプロンプター → Veo API（完了まで数分かかる場合があります）"
+        : "AIプロンプター → スタイル → ComfyUI → Google AI API";
+      imageRefSectionEl.classList.toggle("hidden", isVideo);
+      pipelineEl.classList.toggle("hidden", isVideo);
+      styleRowEl.classList.toggle("hidden", !isVideo);
+      videoOptionsEl.classList.toggle("hidden", !isVideo);
+      resultHintEl.textContent = isVideo
+        ? "（ギャラリーへドラッグ可 / mp4 は comfyui/output に保存）"
+        : "（ギャラリーへドラッグ可）";
+      document.getElementById("result-drag-hint").classList.toggle("hidden", !isVideo);
+      if (isVideo) {
+        if (referenceImage) clearReference();
+        generateBtn.textContent = "動画を生成する";
+        renderPipeline(VIDEO_NODES);
+        promptEl.placeholder = "例: 夕焼けの海岸を走る柴犬、カメラは追従（人物は成人のみ）";
+        document.getElementById("auto-enhance-label").textContent =
+          "Gemini で動画プロンプトを英語に自動拡張";
+        document.getElementById("edit-hint").classList.add("hidden");
+        generateOptionsEl.classList.add("hidden");
+        styleRowEl.classList.remove("hidden");
+      } else {
+        updateMode();
+      }
+      clearEnhanceCache();
+      previewEnhance({ force: true });
+      updateGenerateButtonState();
+    }
+
     function updateMode() {
+      if (mediaMode === "video") return;
       const isEdit = !!referenceImage;
       modeBadgeEl.textContent = isEdit ? "Image to Image" : "新規生成";
       generateBtn.textContent = isEdit ? "画像をカスタマイズする" : "画像を生成する";
+      styleRowEl.classList.toggle("hidden", isEdit);
       generateOptionsEl.classList.toggle("hidden", isEdit);
       document.getElementById("edit-hint").classList.toggle("hidden", !isEdit);
       document.getElementById("auto-enhance-label").textContent = isEdit
@@ -882,7 +1621,62 @@
       previewEnhance({ force: true });
     }
 
+    function showVideoResult(data) {
+      const video = data.video;
+      if (!video) {
+        setPreviewVideoMode(false);
+        previewEl.innerHTML = '<div class="placeholder">動画がありません</div>';
+        return;
+      }
+      const videoUrl = `${video.url}?t=${Date.now()}`;
+      setPreviewVideoMode(true);
+      previewEl.innerHTML = buildVideoPlayerHtml(videoUrl);
+      const player = document.getElementById("video-player");
+      const videoEl = initVideoPlayer(player);
+      const item = normalizeGalleryItem({
+        filename: video.filename,
+        url: video.url,
+        type: "video",
+        thumbUrl: video.thumb_url || guessServerThumbUrl({ filename: video.filename, url: video.url }),
+      });
+      setupVideoResultDrag(player, item);
+      ensureFileCached(item);
+      ensureVideoThumb(item, videoEl).then(() => {
+        ensureThumbCached(item);
+      });
+      statusEl.textContent = "動画生成完了（映像をギャラリーへドラッグ）";
+      statusEl.className = "status";
+      let meta = `job_id: ${data.job_id} / model: ${data.model || ""}`;
+      if (data.original_prompt) meta += `\n入力: ${data.original_prompt}`;
+      if (data.enhanced_prompt && data.enhanced_prompt !== data.original_prompt) {
+        meta += `\nAI拡張: ${data.enhanced_prompt}`;
+      }
+      meta += `\nファイル: ${video.filename}`;
+      if (video.thumb_url) meta += `\nサムネ: ${video.thumb_filename || "あり"}`;
+      metaEl.textContent = meta;
+      renderPipeline(VIDEO_NODES);
+    }
+
+    async function pollVideoJob(jobId) {
+      while (true) {
+        const res = await fetch(`/api/generate-video/${jobId}`);
+        const { data } = await parseJsonResponse(res);
+        if (!res.ok) throw new Error(data.detail || "ステータス取得に失敗しました");
+        statusEl.textContent = data.message || "生成中…";
+        statusEl.className = "status";
+        if (data.status === "completed") {
+          showVideoResult(data);
+          return;
+        }
+        if (data.status === "failed") {
+          throw new Error(data.error || data.message || "動画生成に失敗しました");
+        }
+        await new Promise((r) => setTimeout(r, VIDEO_POLL_MS));
+      }
+    }
+
     function showResult(data) {
+      setPreviewVideoMode(false);
       const image = data.images[0];
       const item = { filename: image.filename, url: image.url };
       previewEl.innerHTML = `<img src="${image.url}?t=${Date.now()}" alt="result" id="result-img" />`;
@@ -928,7 +1722,7 @@
       e.preventDefault();
       galleryEl.classList.remove("drag-over");
       const item = parseDragPayload(e);
-      if (item) addToGallery(item);
+      if (item) addToGallery(normalizeGalleryItem(item));
     });
     setupDropZone(refZoneEl, setReference);
     setupDropZone(previewEl, addToGallery);
@@ -954,6 +1748,13 @@
     });
     styleEl.addEventListener("change", updateStyledPreview);
 
+    document.querySelectorAll(".media-tabs .tab").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.mode === mediaMode) return;
+        setMediaMode(btn.dataset.mode);
+      });
+    });
+
     generateBtn.addEventListener("click", async () => {
       const prompt = promptEl.value.trim();
       if (!prompt) {
@@ -968,11 +1769,45 @@
       }
       generateBtn.disabled = true;
       statusEl.className = "status";
+      setPreviewVideoMode(false);
+      previewEl.innerHTML = '<div class="placeholder">処理中…</div>';
+      metaEl.textContent = "";
+
+      if (mediaMode === "video") {
+        statusEl.textContent = "動画生成ジョブを開始中…";
+        const body = {
+          prompt,
+          model: videoModelEl.value,
+          duration_seconds: parseInt(durationEl.value, 10),
+          aspect_ratio: videoAspectEl.value,
+          auto_enhance: autoEnhanceEl.checked,
+          style: styleEl.value,
+        };
+        if (cachedEnhanced && autoEnhanceEl.checked) {
+          body.enhanced_prompt = cachedEnhanced;
+        }
+        try {
+          const res = await fetch("/api/generate-video", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+          const { data } = await parseJsonResponse(res);
+          if (!res.ok) throw new Error(data.detail || "ジョブ開始に失敗しました");
+          await pollVideoJob(data.job_id);
+        } catch (err) {
+          statusEl.textContent = err.message;
+          statusEl.className = "status error";
+          previewEl.innerHTML = '<div class="placeholder">失敗しました</div>';
+        } finally {
+          updateGenerateButtonState();
+        }
+        return;
+      }
+
       statusEl.textContent = referenceImage
         ? "プロンプト拡張 → カスタマイズ中…"
         : "プロンプト拡張 → ComfyUI → 生成中…";
-      previewEl.innerHTML = '<div class="placeholder">処理中…</div>';
-      metaEl.textContent = "";
 
       const body = {
         prompt,
@@ -1001,6 +1836,14 @@
         previewEl.innerHTML = '<div class="placeholder">失敗しました</div>';
       } finally {
         updateGenerateButtonState();
+      }
+    });
+
+    document.getElementById("gallery-modal-close").addEventListener("click", closeGalleryModal);
+    document.getElementById("gallery-modal-backdrop").addEventListener("click", closeGalleryModal);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !document.getElementById("gallery-modal").classList.contains("hidden")) {
+        closeGalleryModal();
       }
     });
 

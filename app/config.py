@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     google_image_model: str = "imagen-4.0-generate-001"
     google_edit_model: str = "gemini-2.5-flash-image"
     google_prompt_model: str = "gemini-2.5-flash"
+    google_video_model: str = "veo-3.1-lite-generate-preview"
 
     app_host: str = "0.0.0.0"
     app_port: int = 8000

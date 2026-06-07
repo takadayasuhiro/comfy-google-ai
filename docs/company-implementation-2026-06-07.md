@@ -9,7 +9,7 @@ GitHub からクローンして再デプロイし、社員は **`http://localhos
 
 ### 目的
 
-- 日本語プロンプトから高品質な画像を生成（新規生成は Google Imagen / Gemini API）
+- 日本語プロンプトから高品質な画像・動画を生成（Google Imagen / Gemini / **Veo API**）
 - ComfyUI をワークフローエンジンとして利用（ノード連携の可視化・拡張性）
 - カスタマイズ（Image to Image）は Phase2 で **FLUX.1 Schnell img2img（ローカル GPU）** を追加予定
 - 他 AI システム（エージェント LLM、ベクトル DB）と **ポート 80 を共有**し、URL パスで分離
@@ -37,6 +37,8 @@ GitHub からクローンして再デプロイし、社員は **`http://localhos
 | Web アプリ（API + UI） | FastAPI + uvicorn | `venv` + `requirements.txt` | 8000（内部） |
 | ワークフローエンジン | ComfyUI | `comfyui/` + `requirements-comfyui.txt` | 8188（内部のみ） |
 | 画像生成 API | Google Imagen / Gemini | SDK 経由（クラウド） | — |
+| 動画生成 API | Google Veo | FastAPI 直結（ComfyUI 経由なし） | — |
+| 動画サムネ | ffmpeg | OS: `apt install ffmpeg`（推奨） | — |
 | リバースプロキシ | **nginx** | **OS**: `sudo apt install nginx` | 80（社員向け入口） |
 
 ### リポジトリに含まれるもの / 含まれないもの
@@ -90,8 +92,11 @@ GitHub からクローンして再デプロイし、社員は **`http://localhos
 | `APP_PORT` | `8000` | `8000`（nginx が転送） |
 | `EDIT_BACKEND` | `google` | Phase1: `google` / Phase2: `flux_local` |
 | `GOOGLE_API_KEY` | 必須 | 必須 |
+| `GOOGLE_VIDEO_MODEL` | `veo-3.1-lite-generate-preview` | 同上（**`-preview` 必須**） |
 
 テンプレ: [`.env.example`](../.env.example)（自宅）、[`.env.company.example`](../.env.company.example)（会社）
+
+動画機能の詳細: [video-gallery-2026-06-07.md](video-gallery-2026-06-07.md)
 
 ---
 
@@ -99,11 +104,13 @@ GitHub からクローンして再デプロイし、社員は **`http://localhos
 
 ### UI 機能
 
-- **左ペイン**: ギャラリー（3列、ドラッグ並び替え、localStorage 保存、ペイント等へ File ドラッグ）
-- **中央**: プロンプト入力、AIプロンプター、スタイル / API / アスペクト比、生成ボタン
-- **右ペイン**: 生成結果（スクロール不要の横並びレイアウト）
+- **タブ**: 画像 / 動画の切り替え
+- **左ペイン**: ギャラリー（3列、並び替え、**クリックでモーダル表示**、localStorage）
+- **中央**: プロンプト、AIプロンプター、**スタイル**（画像・動画共通）、API / モデル / 尺 / アスペクト比
+- **右ペイン**: 生成結果（画像または動画プレイヤー + 再生コントロール）
 - **Image to Image**: ギャラリーまたは生成結果から参照画像をドラッグ
-- **AI拡張プレビュー**: 生成ボタン下に英語プロンプト表示（スタイル変更はクライアント側 suffix 適用）
+- **動画**: 生成結果をギャラリーへドラッグ、サムネ自動補完（ffmpeg 推奨）
+- **AI拡張プレビュー**: 生成ボタン下に英語プロンプト（スタイル suffix 適用後を表示）
 
 ### バックエンド構成
 
@@ -121,8 +128,9 @@ GitHub からクローンして再デプロイし、社員は **`http://localhos
 
 | モード | ノード連鎖 |
 |--------|------------|
-| 新規生成 | AIプロンプター → スタイル適用 → 画像生成 → 保存 |
+| 新規生成（画像） | AIプロンプター → スタイル適用 → 画像生成 → 保存 |
 | カスタマイズ | AIプロンプター → 画像カスタマイズ → 保存 |
+| 動画生成 | AIプロンプター → スタイル適用 → Veo API → 保存 |
 
 ### 設計上の注意（既知）
 
@@ -139,6 +147,8 @@ GitHub からクローンして再デプロイし、社員は **`http://localhos
 | 生成結果が画面最下部 | 右ペインに配置（横並びレイアウト） |
 | ギャラリーからのドラッグ不可 | 並び替え用データと画像データの両方がある場合もドロップ受付 |
 | `/gazou` サブパス | `APP_BASE_PATH`、`public_path()`、`<base href>`、uvicorn `--root-path` |
+| Veo 動画生成 | FastAPI 直結、ジョブポーリング、`-preview` モデル名 |
+| 動画ギャラリーサムネ | ffmpeg + `/api/video-thumbnail`、モーダル再生 |
 
 ---
 
@@ -379,6 +389,9 @@ bash scripts/status.sh
 | 502 Bad Gateway | ComfyUI 未起動。`bash scripts/start_comfyui.sh` |
 | プロンプト拡張 503 | Gemini 混雑。しばらく待つか生成ボタンを直接試す |
 | API キーエラー | `.env` の `GOOGLE_API_KEY` を確認 |
+| Veo 404 モデル名 | `GOOGLE_VIDEO_MODEL` を `*-preview` に変更 |
+| Veo コンテンツ拒否 | 未成年・性的表現を避けプロンプトを言い換え |
+| 動画サムネが壊れる | `sudo apt install ffmpeg` 後、ページをリロード |
 
 ---
 
@@ -404,7 +417,7 @@ comfy-google-ai/
 ├── custom_nodes/           # ComfyUI カスタムノード
 ├── comfyui/                # ComfyUI 本体（git clone）
 ├── deploy/nginx/           # nginx 設定テンプレ
-├── docs/                   # 本ドキュメント
+├── docs/                   # ドキュメント（会社向け・動画機能）
 ├── scripts/                # 起動・インストールスクリプト
 ├── .env.company.example    # 会社向け env テンプレ
 └── requirements.txt

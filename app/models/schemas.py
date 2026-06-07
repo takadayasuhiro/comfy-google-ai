@@ -35,7 +35,7 @@ class WorkflowSubmitResponse(BaseModel):
 
 class EnhancePromptRequest(BaseModel):
     prompt: str = Field(..., min_length=1)
-    mode: Literal["generate", "edit"] = "generate"
+    mode: Literal["generate", "edit", "video"] = "generate"
 
 
 class EnhancePromptResponse(BaseModel):
@@ -83,3 +83,43 @@ class UiGenerateResponse(BaseModel):
     enhanced_prompt: str | None = None
     style: str | None = None
     workflow_nodes: list[str] = Field(default_factory=list)
+
+
+class GenerateVideoRequest(BaseModel):
+    prompt: str = Field(..., min_length=1, description="動画生成プロンプト")
+    model: str | None = Field(None, description="Veo モデル（省略時は設定のデフォルト）")
+    duration_seconds: int = Field(6, ge=4, le=8, description="動画の長さ（秒）")
+    aspect_ratio: str = Field("16:9", description="16:9 または 9:16")
+    auto_enhance: bool = Field(True, description="Gemini でプロンプトを英語に拡張")
+    style: str = Field("none", description="スタイルプリセット ID")
+    enhanced_prompt: str | None = Field(
+        None,
+        description="プレビュー済みの拡張プロンプト（あれば再拡張をスキップ）",
+    )
+
+
+class GeneratedVideoInfo(BaseModel):
+    filename: str
+    url: str
+    thumb_filename: str | None = None
+    thumb_url: str | None = None
+
+
+class VideoJobStartResponse(BaseModel):
+    job_id: str
+    status: str
+    message: str
+    original_prompt: str | None = None
+    enhanced_prompt: str | None = None
+
+
+class VideoJobStatusResponse(BaseModel):
+    job_id: str
+    status: Literal["queued", "running", "completed", "failed"]
+    message: str
+    model: str | None = None
+    prompt: str | None = None
+    original_prompt: str | None = None
+    enhanced_prompt: str | None = None
+    video: GeneratedVideoInfo | None = None
+    error: str | None = None
