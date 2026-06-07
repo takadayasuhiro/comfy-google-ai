@@ -1,0 +1,18 @@
+{
+  "1": {
+    "class_type": "GoogleAIImageGenerate",
+    "inputs": {
+      "prompt": "夕焼けの海辺で走る柴犬、水彩画風",
+      "provider": "imagen",
+      "model": "imagen-4.0-generate-001",
+      "aspect_ratio": "1:1"
+    }
+  },
+  "2": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "filename_prefix": "google_ai",
+      "images": ["1", 0]
+    }
+  }
+}

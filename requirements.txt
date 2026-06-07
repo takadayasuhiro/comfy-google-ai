@@ -1,0 +1,16 @@
+# FastAPI Webアプリ（Google AI API 仲介レイヤー）
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.12
+
+# Google AI 公式 SDK（Gemini / Imagen / Veo 等）
+google-genai>=1.0.0
+
+# 設定・HTTP クライアント
+pydantic-settings>=2.6.0
+python-dotenv>=1.0.1
+httpx>=0.28.0
+aiofiles>=24.1.0
+
+# 画像処理
+Pillow>=11.0.0

@@ -1,0 +1,30 @@
+# ComfyUI 本体用（CPU モード・ワークフローエンジンのみ）
+# comfyui/ にクローン後、別途インストールする
+#
+# PyTorch CPU 版（GPU/CUDA 不要）
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch>=2.4.0
+torchvision>=0.19.0
+torchaudio>=2.4.0
+
+# ComfyUI が要求する主要依存（requirements.txt から抜粋・CPU向け）
+comfyui-frontend-package
+comfyui-workflow-templates
+comfyui-embedded-docs
+aiohttp>=3.11.0
+yarl>=1.18.0
+einops
+transformers>=4.37.2
+tokenizers>=0.13.3
+sentencepiece
+safetensors>=0.4.2
+accelerate>=0.25.0
+pyyaml
+Pillow
+scipy
+tqdm
+psutil
+kornia>=0.7.1
+spandrel
+soundfile
+av>=14.2.0
