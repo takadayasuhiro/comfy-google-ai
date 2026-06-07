@@ -380,7 +380,26 @@ bash scripts/status.sh
 
 ---
 
-## 10. トラブルシュート
+## 10. API 料金・利用枠（利用者向け）
+
+本システムの画像・動画生成は **Google AI Studio API キー（従量課金）** です。
+
+- **Google AI Pro の月額契約 ≠ API 無制限**（Gemini アプリ枠と API は別）
+- 動画（Veo）は **無料枠なし**。Lite 6秒 720p で **約 $0.30/本**
+- 画像（Imagen 4 Standard）は **約 $0.04/枚**
+- Pro 特典の **$10 GCP クレジット** は Developer Program 連携が必要（未連携なら使えない）
+
+社員への周知事項:
+
+1. 生成のたびに API コストが発生する（特に動画は高額・長時間）
+2. 大量生成・連続リトライは控える（Spend Cap・レート制限の両方に影響）
+3. 管理者は AI Studio の **Billing / Spend Cap** を設定すること
+
+詳細: [billing-and-usage-2026-06-07.md](billing-and-usage-2026-06-07.md)
+
+---
+
+## 11. トラブルシュート
 
 | 症状 | 対処 |
 |------|------|
@@ -395,7 +414,7 @@ bash scripts/status.sh
 
 ---
 
-## 11. セキュリティ
+## 12. セキュリティ
 
 - `.env` と API キーを Git にコミットしない
 - ComfyUI（8188）は `127.0.0.1` のみで待ち受け、nginx から公開しない
